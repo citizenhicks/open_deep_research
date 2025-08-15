@@ -82,26 +82,14 @@ async def tavily_search(
     max_char_to_include = configurable.max_content_length
     
     # Initialize summarization model with retry logic
-    try:
-        from model import get_llm
-        # Use our custom OpenRouter model for summarization
-        base_model = get_llm(
-            model_name=configurable.summarization_model.split(":")[-1] if ":" in configurable.summarization_model else configurable.summarization_model,
-            max_tokens=configurable.summarization_model_max_tokens
-        )
-        summarization_model = base_model.with_structured_output(Summary).with_retry(
-            stop_after_attempt=configurable.max_structured_output_retries
-        )
-    except ImportError:
-        # Fallback to default LangChain model
-        model_api_key = get_api_key_for_model(configurable.summarization_model, config)
-        summarization_model = init_chat_model(
-            model=configurable.summarization_model,
-            max_tokens=configurable.summarization_model_max_tokens,
-            api_key=model_api_key,
-            tags=["langsmith:nostream"]
-        ).with_structured_output(Summary).with_retry(
-            stop_after_attempt=configurable.max_structured_output_retries
+    model_api_key = get_api_key_for_model(configurable.summarization_model, config)
+    summarization_model = init_chat_model(
+        model=configurable.summarization_model,
+        max_tokens=configurable.summarization_model_max_tokens,
+        api_key=model_api_key,
+        tags=["langsmith:nostream"]
+    ).with_structured_output(Summary).with_retry(
+        stop_after_attempt=configurable.max_structured_output_retries
     )
     
     # Step 4: Create summarization tasks (skip empty content)
@@ -887,7 +875,7 @@ def get_today_str() -> str:
     Returns:
         Human-readable date string in format like 'Mon Jan 15, 2024'
     """
-    now = datetime.now()
+    now = datetime.datetime.now()
     return f"{now:%a} {now:%b} {now.day}, {now:%Y}"
 
 def get_config_value(value):

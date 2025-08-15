@@ -53,16 +53,9 @@ from open_deep_research.utils import (
 )
 
 # Initialize a configurable model that we will use throughout the agent
-# This will be replaced by our custom model if imported from prometheus-graph
-try:
-    from model import get_llm
-    configurable_model = get_llm()
-    print("✅ Using custom OpenRouter model")
-except ImportError:
-    configurable_model = init_chat_model(
-        configurable_fields=("model", "max_tokens", "api_key"),
-    )
-    print("⚠️ Using default LangChain model")
+configurable_model = init_chat_model(
+    configurable_fields=("model", "max_tokens", "api_key"),
+)
 
 async def clarify_with_user(state: AgentState, config: RunnableConfig) -> Command[Literal["write_research_brief", "__end__"]]:
     """Analyze user messages and ask clarifying questions if the research scope is unclear.
